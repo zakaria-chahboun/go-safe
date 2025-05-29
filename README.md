@@ -11,40 +11,10 @@ A minimalist Go package for safely working with pointers.
 
 ## Overview
 
-The `safe` package helps you extract values from pointers in a clean, generic, and safe way—avoiding repetitive `if != nil` checks.
+The `safe` package helps you extract values from pointers in a clean, generic, and safe way—avoiding repetitive `if != nil` checks 🕵.
 
 - `Value`: Returns the value from a pointer, or a fallback (default or zero value).
 - `Pointer`: Always returns a non-nil pointer, optionally using a default.
-
-No more verbose lines:
-
-```go
-type Collection struct {
-	Name *string // nil pointer
-}
-
-func main() {
-	var collection *Collection // nil pointer
-	var name string
-
-    // ------------------------------------------
-
-	// Verbose style
-	if collection != nil && collection.Name != nil {
-		name = *collection.Name
-	} else {
-		name = "default"
-	}
-	fmt.Println("Verbose:", name)
-
-    // ------------------------------------------
-
-	// Safe style
-	coll := safe.Value(collection) // zero value: Collection{}
-	name = safe.Value(coll.Name, "default") // default value
-	fmt.Println("Safe:", name)
-}
-```
 
 ---
 
@@ -76,11 +46,13 @@ type User struct {
 func main() {
 	// string
 	var name *string
+	fmt.Println(safe.Value(name)) // ""
 	fmt.Println(safe.Value(name, "Guest")) // Guest
 
 	s := "Zakaria"
-	name = &s
-	fmt.Println(safe.Value(name)) // Zakaria
+	name = &s                                  // 👈 not nil pointer
+	fmt.Println(safe.Value(name))              // Zakaria
+	fmt.Println(safe.Value(name, "Anonymous")) // Zakaria ✅
 
 	// int
 	var age *int
@@ -92,7 +64,7 @@ func main() {
 		City string
 	}
 	var info *Info
-	fmt.Println(safe.Value(info))                       // {} (zero)
+	fmt.Println(safe.Value(info))                       // {}
 	fmt.Println(safe.Value(info, Info{City: "Agadir"})) // {Agadir}
 
 	// slice
@@ -122,32 +94,29 @@ import (
 	"github.com/zakaria-chahboun/go-safe/safe"
 )
 
-func main() {
-	// ------------------------------------
+func main() {-
 	// Case 1: Same pointer reuse
-	// ------------------------------------
-	var p *string
-	fmt.Println("p before:", p) // nil
+	var p1 *string
+	fmt.Println("p1 before:", p1) // nil
 
-	p = safe.Pointer(p, "default") // p gets a new address since it was nil
-	p2 := safe.Pointer(p)          // p is not nil, so p2 points to the same address
+	p1  = safe.Pointer(nil, "default") // p1 gets a new address since it was nil
+	p2 := safe.Pointer(p)              // p1 is not nil, so p2 points to the same address
 
-	fmt.Println("p value:", *p)    // p value: default
-	fmt.Println("p2 value:", *p2)  // p2 value: default
-	fmt.Println("p == p2:", p == p2) // true ✅ identical pointers
+	fmt.Println(*p1)      // default
+	fmt.Println(*p2)      // default
+	fmt.Println(p1 == p2) // true ✅ identical pointers
 
-	// ------------------------------------
+
 	// Case 2: Different allocations
-	// ------------------------------------
 	var ptr *int
 	fmt.Println("ptr before:", ptr) // nil
 
 	a := safe.Pointer(ptr) // new pointer allocated with zero value
 	b := safe.Pointer(ptr) // another new pointer allocated with zero value
 
-	fmt.Println("a value:", *a)     // 0
-	fmt.Println("b value:", *b)     // 0
-	fmt.Println("a == b:", a == b)  // false ❌ different memory addresses
+	fmt.Println(*a)     // default
+	fmt.Println(*b)     // default
+	fmt.Println(a == b) // false ❌ different memory addresses
 }
 ```
 
