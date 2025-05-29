@@ -5,7 +5,7 @@ A minimalist Go package for safely working with pointers.
 - 🛡️ Prevents nil panics
 - ⚡ Zero-dependency, idiomatic, generic
 
-![go safe mascot](./go-safe-mascot.png)
+![go safe cover](./go-safe-cover.png)
 
 ---
 
