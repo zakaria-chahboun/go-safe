@@ -99,8 +99,8 @@ func main() {-
 	var p1 *string
 	fmt.Println("p1 before:", p1) // nil
 
-	p1  = safe.Pointer(nil, "default") // p1 gets a new address since it was nil
-	p2 := safe.Pointer(p)              // p1 is not nil, so p2 points to the same address
+	p1  = safe.Pointer(p1, "default") // p1 gets a new address since it was nil
+	p2 := safe.Pointer(p1)              // p1 is not nil, so p2 points to the same address
 
 	fmt.Println(*p1)      // default
 	fmt.Println(*p2)      // default
