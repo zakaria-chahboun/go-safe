@@ -114,8 +114,8 @@ func main() {-
 	a := safe.Pointer(ptr) // new pointer allocated with zero value
 	b := safe.Pointer(ptr) // another new pointer allocated with zero value
 
-	fmt.Println(*a)     // default
-	fmt.Println(*b)     // default
+	fmt.Println(*a)     // 0
+	fmt.Println(*b)     // 0
 	fmt.Println(a == b) // false ❌ different memory addresses
 }
 ```
