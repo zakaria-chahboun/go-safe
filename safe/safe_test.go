@@ -10,7 +10,7 @@ import (
 func TestValue_String(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *string
-		result := Value(ptr, "default")
+		result := ValueOr(ptr, "default")
 		if result != "default" {
 			t.Errorf("Expected 'default', got '%s'", result)
 		}
@@ -36,7 +36,7 @@ func TestValue_String(t *testing.T) {
 	t.Run("non-nil pointer with default", func(t *testing.T) {
 		str := "Zakaria"
 		ptr := &str
-		result := Value(ptr, "default")
+		result := ValueOr(ptr, "default")
 		if result != "Zakaria" {
 			t.Errorf("Expected 'Zakaria', got '%s'", result)
 		}
@@ -47,7 +47,7 @@ func TestValue_String(t *testing.T) {
 func TestValue_Int(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *int
-		result := Value(ptr, 25)
+		result := ValueOr(ptr, 25)
 		if result != 25 {
 			t.Errorf("Expected 25, got %d", result)
 		}
@@ -81,7 +81,7 @@ func TestValue_Struct(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *Info
 		defaultInfo := Info{City: "Agadir", Code: 123}
-		result := Value(ptr, defaultInfo)
+		result := ValueOr(ptr, defaultInfo)
 		if result.City != "Agadir" || result.Code != 123 {
 			t.Errorf("Expected {Agadir 123}, got %+v", result)
 		}
@@ -111,7 +111,7 @@ func TestValue_Slice(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *[]string
 		defaultSlice := []string{"a", "b", "c"}
-		result := Value(ptr, defaultSlice)
+		result := ValueOr(ptr, defaultSlice)
 		if !reflect.DeepEqual(result, defaultSlice) {
 			t.Errorf("Expected %v, got %v", defaultSlice, result)
 		}
@@ -140,7 +140,7 @@ func TestValue_Map(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *map[string]int
 		defaultMap := map[string]int{"a": 1, "b": 2}
-		result := Value(ptr, defaultMap)
+		result := ValueOr(ptr, defaultMap)
 		if !reflect.DeepEqual(result, defaultMap) {
 			t.Errorf("Expected %v, got %v", defaultMap, result)
 		}
@@ -169,7 +169,7 @@ func TestValue_Time(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *time.Time
 		defaultTime := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
-		result := Value(ptr, defaultTime)
+		result := ValueOr(ptr, defaultTime)
 		if !result.Equal(defaultTime) {
 			t.Errorf("Expected %v, got %v", defaultTime, result)
 		}
@@ -198,7 +198,7 @@ func TestValue_Time(t *testing.T) {
 func TestPointer_String(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *string
-		result := Pointer(ptr, "default")
+		result := PointerOr(ptr, "default")
 		if result == nil {
 			t.Error("Expected non-nil pointer")
 		}
@@ -233,7 +233,7 @@ func TestPointer_String(t *testing.T) {
 	t.Run("non-nil pointer with default should ignore default", func(t *testing.T) {
 		str := "Zakaria"
 		ptr := &str
-		result := Pointer(ptr, "default")
+		result := PointerOr(ptr, "default")
 		if result != ptr {
 			t.Error("Expected same pointer to be returned")
 		}
@@ -247,7 +247,7 @@ func TestPointer_String(t *testing.T) {
 func TestPointer_Int(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *int
-		result := Pointer(ptr, 25)
+		result := PointerOr(ptr, 25)
 		if result == nil {
 			t.Error("Expected non-nil pointer")
 		}
@@ -322,7 +322,7 @@ func TestPointer_Struct(t *testing.T) {
 	t.Run("nil pointer with default", func(t *testing.T) {
 		var ptr *User
 		defaultUser := User{Name: "Guest", Age: 25}
-		result := Pointer(ptr, defaultUser)
+		result := PointerOr(ptr, defaultUser)
 		if result == nil {
 			t.Error("Expected non-nil pointer")
 		}
@@ -341,31 +341,6 @@ func TestPointer_Struct(t *testing.T) {
 	})
 }
 
-// TestValue_MultipleDefaults tests behavior with multiple default values
-func TestValue_MultipleDefaults(t *testing.T) {
-	t.Run("multiple defaults uses first one", func(t *testing.T) {
-		var ptr *string
-		result := Value(ptr, "first", "second", "third")
-		if result != "first" {
-			t.Errorf("Expected 'first', got '%s'", result)
-		}
-	})
-}
-
-// TestPointer_MultipleDefaults tests behavior with multiple default values
-func TestPointer_MultipleDefaults(t *testing.T) {
-	t.Run("multiple defaults uses first one", func(t *testing.T) {
-		var ptr *int
-		result := Pointer(ptr, 10, 20, 30)
-		if result == nil {
-			t.Error("Expected non-nil pointer")
-		}
-		if *result != 10 {
-			t.Errorf("Expected 10, got %d", *result)
-		}
-	})
-}
-
 // BenchmarkValue tests performance of Value function
 func BenchmarkValue(b *testing.B) {
 	str := "benchmark"
@@ -380,7 +355,7 @@ func BenchmarkValue(b *testing.B) {
 	b.Run("nil pointer with default", func(b *testing.B) {
 		var nilPtr *string
 		for i := 0; i < b.N; i++ {
-			_ = Value(nilPtr, "default")
+			_ = ValueOr(nilPtr, "default")
 		}
 	})
 }
@@ -399,7 +374,7 @@ func BenchmarkPointer(b *testing.B) {
 	b.Run("nil pointer with default", func(b *testing.B) {
 		var nilPtr *string
 		for i := 0; i < b.N; i++ {
-			_ = Pointer(nilPtr, "default")
+			_ = PointerOr(nilPtr, "default")
 		}
 	})
 }
