@@ -13,8 +13,10 @@ A minimalist Go package for safely working with pointers.
 
 The `safe` package helps you extract values from pointers in a clean, generic, and safe way—avoiding repetitive `if != nil` checks 🕵.
 
-- `Value`: Returns the value from a pointer, or a fallback (default or zero value).
-- `Pointer`: Always returns a non-nil pointer, optionally using a default.
+* `Value`: Returns the value from a pointer, or the zero value.
+* `ValueOr`: Returns the value from a pointer, or a default fallback.
+* `Pointer`: Ensures a non-nil pointer, using zero value if needed.
+* `PointerOr`: Ensures a non-nil pointer, using a default fallback.
 
 ---
 
@@ -26,7 +28,7 @@ Using `Go 1.18+`
 go get github.com/zakaria-chahboun/go-safe/safe@latest
 ```
 
-## Usage (Value)
+## Usage (Value & ValueOr)
 
 ```go
 package main
@@ -47,17 +49,17 @@ func main() {
 	// string
 	var name *string
 	fmt.Println(safe.Value(name)) // ""
-	fmt.Println(safe.Value(name, "Guest")) // Guest
+	fmt.Println(safe.ValueOr(name, "Guest")) // Guest
 
 	s := "Zakaria"
-	name = &s                                  // 👈 not nil pointer
-	fmt.Println(safe.Value(name))              // Zakaria
-	fmt.Println(safe.Value(name, "Anonymous")) // Zakaria ✅
+	name = &s                                    // 👈 not nil pointer
+	fmt.Println(safe.Value(name))                // Zakaria
+	fmt.Println(safe.ValueOr(name, "Anonymous")) // Zakaria ✅
 
 	// int
 	var age *int
 	fmt.Println(safe.Value(age))       // 0
-	fmt.Println(safe.Value(age, 25))   // 25
+	fmt.Println(safe.ValueOr(age, 25)) // 25
 
 	// struct
 	type Info struct {
@@ -65,7 +67,7 @@ func main() {
 	}
 	var info *Info
 	fmt.Println(safe.Value(info))                       // {}
-	fmt.Println(safe.Value(info, Info{City: "Agadir"})) // {Agadir}
+	fmt.Println(safe.ValueOr(info, Info{City: "Agadir"})) // {Agadir}
 
 	// slice
 	var items *[]string
@@ -80,11 +82,11 @@ func main() {
 	fmt.Println(safe.Value(created)) // 0001-01-01 00:00:00 +0000 UTC
 
 	now := time.Now()
-	fmt.Println(safe.Value(&now)) // current time	
+	fmt.Println(safe.Value(&now)) // current time
 }
 ```
 
-## Usage (Pointer)
+## Usage (Pointer & PointerOr)
 
 ```go
 package main
@@ -94,12 +96,12 @@ import (
 	"github.com/zakaria-chahboun/go-safe/safe"
 )
 
-func main() {-
+func main() {
 	// Case 1: Same pointer reuse
 	var p1 *string
 	fmt.Println("p1 before:", p1) // nil
 
-	p1  = safe.Pointer(p1, "default") // p1 gets a new address since it was nil
+	p1 = safe.PointerOr(p1, "default") // p1 gets a new address
 	p2 := safe.Pointer(p1)              // p1 is not nil, so p2 points to the same address
 
 	fmt.Println(*p1)      // default
@@ -122,11 +124,17 @@ func main() {-
 
 ### Note on Pointer Behavior
 
-- When the input pointer is nil, safe.Pointer allocates and returns a new pointer holding the zero or default value.
-- If the input pointer is not nil, safe.Pointer simply returns it as-is — no new memory is allocated.
-- This means:
-    - Two calls with the same non-nil pointer will return identical pointers (`== true`).
-    - Two calls with a nil pointer will return different pointers, even if the values are equal (`== false`).
+* If input pointer is **non-nil**, `Pointer`/`PointerOr` return it directly ✔
+* If input pointer is **nil**, a **new pointer** is allocated:
+
+  * `Pointer` → zero value
+  * `PointerOr` → provided default value
+* This means:
+
+  * Two calls with the same non-nil pointer → same memory (`== true`)
+  * Two calls with nil pointer → new memory each time (`== false`)
+
+---
 
 ## Testing
 
@@ -142,6 +150,8 @@ Run tests with:
 ```shell
 go test ./safe -v -cover
 ```
+
+---
 
 ## 📄 License
 
